@@ -11,11 +11,11 @@ router.get('/get/:word', urlencodedParser, function(req, res, next) {
     if(!req.body) return res.sendStatus(400);
     var word = req.params.word;
     database.searchData(word, function(err, resp) {
-        /*if(err){
+        if(err){
             res.render('errorMessage', { message:resp });
         } else {
-            res.render('listSource', { sources:resp });
-        }*/
+            res.render('dataFound', { data:resp });
+        }
     });
   
 });

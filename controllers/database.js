@@ -1,130 +1,223 @@
 var MongoClient = require('mongodb').MongoClient;
 var ObjectId = require('mongodb').ObjectId; 
-var url = "mongodb://localhost:27017/";
+var url = "mongodb://localhost:27017/TrabalhoPratico";
+var mongoose = require('mongoose');
+var fs = require('fs');
+var Schema = mongoose.Schema;
 
+var SourceSchema = new Schema({
+    src: String
+});
+var Source = mongoose.model('source', SourceSchema);
+
+var DataSchema = new Schema({
+    title: String,
+    author: String,
+    description: String,
+    date: Date,
+    language: String,
+    subject: String
+});
+var Data = mongoose.model('data', DataSchema);
+
+var SearchSchema = new Schema({
+    count: Number,
+    dateStart: Date,
+    dateEnd: Date
+});
+var Search = mongoose.model('search', SearchSchema);
 
 function addSource(source, callback) {
-    MongoClient.connect(url, function(err, db) {
-        if (err) throw err;
-        var dbo = db.db("TrabalhoPratico");
-        var myobj = { src: source };
-        var hasOne = 0;
-        dbo.collection("sources").find({}, { _id: 0, src: 1 }).toArray(function(err, result) {
-            if (err) throw err;
-            for(let i=0;i<result.length;i++) {
-                if(result[i].src == source) {
-                    hasOne++;
-                }
-            }
-            if(!hasOne) {
-                dbo.collection("sources").insertOne(myobj, function(err, res) {
-                    if (err){ callback(err, ''); throw err; }
-                    callback(null, myobj);
-                });
+    mongoose.connect(url);
+    var db = mongoose.connection;
+    db.on('error',function(err){
+        console.error(err);
+    });    
+
+    db.once('open',function(){
+        var query = Source.find({});
+        query.where('src', source);
+        query.exec(function (err, docs) {
+            if(docs.length) {
+                callback(1, 'Já existe este registo');                    
             } else {
-                callback(1, 'Já existe registo');
-            }
-            db.close();
-        });       
-    });
+                var s1 = new Source({
+                    src: source
+                });
+                
+                s1.save(function(err, result){
+                    callback(null, result);                        
+                });
+            }  
+        });          
+    });    
 }
 
 function getSources(callback) {
-    MongoClient.connect(url, function(err, db) {
-        if (err) throw err;
-        var dbo = db.db("TrabalhoPratico");
-        dbo.collection("sources").find({}, { _id: 1, src: 1 }).toArray(function(err, result) {
-            if (err) throw err;
-            callback(null, result);            
-            db.close();
-        });       
-    });
+    mongoose.connect(url);
+    var db = mongoose.connection;
+    db.on('error',function(err){
+        callback(1, err);
+    });    
+
+    db.once('open',function(){
+        var query = Source.find({});
+        query.exec(function (err, docs) {
+            callback(null, docs);  
+        });          
+    });         
 }
 
 function getSource(id, callback) {
-    MongoClient.connect(url, function(err, db) {
-        if (err) {callback(1, err); throw err;}
-        var dbo = db.db("TrabalhoPratico");
+    mongoose.connect(url);
+    var db = mongoose.connection;
+    db.on('error',function(err){
+        callback(1, err);
+    });    
+
+    db.once('open',function(){
         var o_id = new ObjectId(id);
-        dbo.collection("sources").find({ "_id": o_id }, {}).toArray(function(err, result) {
-            if (err) throw err;
-            callback(null, result);            
-            db.close();
-        });       
-    });
+        var query = Source.find({});
+        query.where('_id', o_id);
+        query.exec(function (err, docs) {
+            callback(null, docs);  
+        });          
+    });  
 }
 
 function deleteSource(id, callback) {
-    MongoClient.connect(url, function(err, db) {      
-        if (err){ callback(1, err); throw err;}
-        var dbo = db.db("TrabalhoPratico");
+    mongoose.connect(url);
+    var db = mongoose.connection;
+    db.on('error',function(err){
+        callback(1, err);
+    });    
+
+    db.once('open',function(){
         var o_id = new ObjectId(id);
-        var myquery = { _id: o_id };
-        dbo.collection("sources").deleteOne(myquery, function(err, obj) {
-            if (err) throw err;
-            callback(0, '');
-            db.close();
+        Source.remove({'_id': o_id}, function(err, resp){
+            callback(null, resp); 
+        });        
+    });  
+}
+
+function editSource(id, src, callback) {   
+    mongoose.connect(url);
+    var db = mongoose.connection;
+    db.on('error',function(err){
+        callback(1, err);
+    });    
+
+    db.once('open',function(){
+        var o_id = new ObjectId(id);    
+
+        Source.update({ '_id': o_id }, { src:src }, function(err, resp){
+            if(err) {
+                callback(1, err);
+            } else {
+                callback(null, resp);
+            }
         });
     });
 }
 
-function editSource(id, src, callback) {
-    MongoClient.connect(url, function(err, db) {      
-        if (err){ callback(1, err); throw err;}
-        var dbo = db.db("TrabalhoPratico");
-        var o_id = new ObjectId(id);
-        var myquery = { _id: o_id };
-        var newvalues = { $set: { src:src } };
-        dbo.collection('sources').updateOne(myquery, newvalues, function(err, result) {
-           callback(0, '');  
-        });
-    });
-}
+function addData(things, callback) {
+    mongoose.connect(url);
+    let arrData = [], dateStart = new Date(), dateEnd, tot;
+    var db = mongoose.connection;
+    db.on('error',function(err){
+        console.error(err);
+    });    
+    for(let i=0;i<things.length;i++) {
+        let data = things[i];
+        arrData.push(new Data({
+            title: data.title,
+            author: data.author,
+            description: data.description,
+            date: data.date,
+            language: data.language,
+            subject: data.subject
+        }));
 
-function addData(things) {
-    MongoClient.connect(url, function(err, db) {
-        if (err) throw err;
-        var dbo = db.db("TrabalhoPratico");
-
-        for(let i=0;i<things.length;i++) {
-            let data = things[i];
-            dbo.collection("data").find({}, { _id: 0, title: 1, author: 1 }).toArray(function(err, result) {
-                if (err) throw err;  
-                let hasOne = 0;
-                for(let x=0;x<result.length;x++) {
-                    if(result[x].title == data.title && result[x].author == data.author) {                      
-                        hasOne = 1;
-                        db.close();
-                    }
+    } 
+    db.once('open',function(){        
+        Data.collection.insert(arrData, function (err, docs) {
+            if (err){ 
+                return console.error(err);
+            } else {
+                let data = {
+                    count: docs.result.n,
+                    dateStart: dateStart,
+                    dateEnd: new Date()
                 }
-                if(!hasOne) {
-                    dbo.collection("data").insertOne(data, function(err, res) {
-                        if (err){ throw err; }      
-                        
-                    });
-                }      
-            });
-        }
+                addSearchInfo(data);
+                callback(null, docs);
+            }
+        });       
     });
 }
 
 function searchData(keyword, callback) {
-    MongoClient.connect(url, function(err, db) {
-        if (err) throw err;
-        var dbo = db.db("TrabalhoPratico");
-        var myobj = { src: source };
-        var hasOne = 0;
-        dbo.collection("data").find({}, { _id: 0, title: 1, author: 1, description: 1, subject: 1}).toArray(function(err, result) {
-            console.log(result);
+    let arrayData = [];
+
+    mongoose.connect(url);
+    var db = mongoose.connection;
+    db.on('error',function(err){
+        callback(1, err);
+    });    
+
+    db.once('open',function(){
+        let query = Data.find({});
+        query.exec(function (err, docs) {
+            for(let i=0;i<docs.length;i++) {
+                let title = author = description = subject = date = true;
+                if(docs[i].title) { title = ((docs[i].title).indexOf(keyword) !== -1); } else { title = false; }
+                if(docs[i].author) { author = ((docs[i].author).indexOf(keyword) !== -1); } else { author = false; }
+                if(docs[i].description) { description = ((docs[i].description).indexOf(keyword) !== -1); } else { description = false; }
+                if(docs[i].subject) { subject = ((docs[i].subject).indexOf(keyword) !== -1); } else { subject = false; }
+                if(docs[i].date) { date = (new Date(docs[i].date).getTime() === new Date(keyword).getTime()); } else { date = false; }
+                if(  title || author || description || subject || date  ) { arrayData.push(docs[i]); }
+            }
             db.close();
-        });       
+            callback(null, arrayData); 
+        });          
+    });  
+}
+
+function addSearchInfo(data) {
+    mongoose.connect(url);
+    var db = mongoose.connection;
+    db.on('error',function(err){
+        console.error(err);
+    });    
+    db.once('open',function(){
+        var s1 = new Search({
+            count: data.count,
+            dateStart: data.dateStart,
+            dateEnd: data.dateEnd
+        });
+
+        s1.save(function(err, result){ });
     });
 }
 
+function getSources(callback) {
+    mongoose.connect(url);
+    var db = mongoose.connection;
+    db.on('error',function(err){
+        callback(1, err);
+    });    
 
+    db.once('open',function(){
+        var query = Source.find({});
+        query.exec(function (err, docs) {
+            callback(null, docs);  
+        });          
+    });         
+}
 exports.addSource = addSource;
 exports.getSources = getSources;
 exports.getSource = getSource;
 exports.deleteSource = deleteSource;
 exports.editSource = editSource;
 exports.addData = addData;
+exports.searchData = searchData;

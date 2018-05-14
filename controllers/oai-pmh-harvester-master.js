@@ -4,18 +4,22 @@ var database = require('./database');
 let things = [];
 
 var count = 0;
-function extractData( dataProviderUrl, callback){
-    // a valid data provider url
-    //const dataProviderUrl = 'http://ciencipca.ipca.pt/oaiextended/request?verb=ListRecords&metadataPrefix=oai_dc';
+function extractData( id, callback){    
+    database.getSource(id, function(err, resp){
+        dataProviderUrl = resp[0].src;
+        let harvester = new oaipmh.Harvester(dataProviderUrl);
 
-    // instanciate a new harvester object
-    let harvester = new oaipmh.Harvester(dataProviderUrl);
-
-    // harvest data source passing a processing function
-    harvester.harvest(processItem, function(err, res){
-        callback(count);        
-        database.addData(things);
-    });    
+        // harvest data source passing a processing function
+        harvester.harvest(processItem, function(err, res){      
+            database.addData(things, function(err, result) {
+                if(err){
+                    callback(1, 'Erro ao gravar dados' );
+                } else {
+                    callback(null, result);
+                }                
+            });
+        });
+    });
 }
 
 // This function will process each harvested record

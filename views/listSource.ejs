@@ -18,13 +18,15 @@
         <ul id="content">
             <% for(let i=0;i<sources.length;i++) { %>
                 <li>
-                  <%= sources[i].src %>&nbsp;                
-                  <form method="POST" action="/source/extract">
-                    <input type="hidden" value="<%= sources[i].src %>" name="SOURCE">
-                    <button>Obter Dados</button>
-                  </form>
-                  <button onclick="window.location='/source/edit/<%= sources[i]._id %>'">Editar</button>
-                  <button onclick="deleteSource('<%= sources[i]._id %>', '<%= sources[i].src %>')">Remove</button>
+                  <%= sources[i].src %>&nbsp;  
+                  <div class="list-button-box">            
+                    <form method="POST" action="/source/extract">
+                      <input type="hidden" value="<%= sources[i].src %>" name="SOURCE">
+                      <button>Obter Dados</button>
+                    </form>
+                    <button onclick="window.location='/source/edit/<%= sources[i]._id %>'">Editar</button>
+                    <button onclick="deleteSource('<%= sources[i]._id %>', '<%= sources[i].src %>')">Remove</button>
+                  </div>
                 </li>
             <% } %>
         </ul>
