@@ -21,4 +21,17 @@ router.get('/datas/:word', urlencodedParser, function(req, res, next) {
 });
 
 
+router.get('/extractions', function(req, res, next) {
+    console.log('Teste out');
+    database.getSearchs(function(err, resp) {
+        if(err){
+            res.jsonp({'Erro': resp});
+        } else {
+            res.jsonp({'Data': resp });
+        }
+    });
+  
+});
+
+
 module.exports = router;

@@ -200,16 +200,20 @@ function addSearchInfo(data) {
     });
 }
 
-function getSources(callback) {
+function getSearchs(callback) {
+    console.log('Teste 1');
     mongoose.connect(url);
     var db = mongoose.connection;
     db.on('error',function(err){
         callback(1, err);
     });    
-
+    console.log('Teste 2');
     db.once('open',function(){
-        var query = Source.find({});
+        console.log('Teste 3');
+        var query = Search.find({});
         query.exec(function (err, docs) {
+            console.log('Teste 4');
+            console.log(docs);
             callback(null, docs);  
         });          
     });         
@@ -221,3 +225,4 @@ exports.deleteSource = deleteSource;
 exports.editSource = editSource;
 exports.addData = addData;
 exports.searchData = searchData;
+exports.getSearchs = getSearchs;
