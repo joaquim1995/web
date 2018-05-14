@@ -1,0 +1,11 @@
+
+<% for(let i=0;i<sources.length;i++) { %>
+    <li>
+        <%= sources[i].src %>&nbsp;
+        <button onclick="window.location='/source/edit/<%= sources[i]._id %>'">Editar</button>
+        <button onclick="deleteSource('<%= sources[i]._id %>')">Remove</button>
+    </li>
+<% } %>
+
+
+

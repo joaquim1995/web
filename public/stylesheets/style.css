@@ -1,0 +1,7 @@
+body {padding: 50px;font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;position: relative;}
+a {color: #00B7FF;}
+.list-content{border:1px solid black;position:relative;}
+.spinner{position:absolute;left:50%;margin-left:-15px;top:50%;margin-top:-5px;display:none;}
+.success-message {position: absolute; width:400px;height: 100px;left: 50%;top:50%;margin-left:-215px;z-index:2;border:1px solid black;padding:15px;background: white;display: none;}
+.success-button{float: right;margin: 15px;}
+.clear{clear: both;}

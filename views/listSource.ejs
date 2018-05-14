@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Sucesso</title>
+    <link rel='stylesheet' href='https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css' />
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+    
+  </head>
+  <body>
+    <div class="success-message">
+        <button class="success-button">X</button>
+        <div class="clear"></div>
+        <span>Os dados foram obtidos com sucesso.</span>
+    </div>
+    <div class="container">
+      <h1>A listagem de links:</h1>
+      <div class="list-content">
+        <ul id="content">
+            <% for(let i=0;i<sources.length;i++) { %>
+                <li>
+                  <%= sources[i].src %>&nbsp;                
+                  <form method="POST" action="/source/extract">
+                    <input type="hidden" value="<%= sources[i].src %>" name="SOURCE">
+                    <button>Obter Dados</button>
+                  </form>
+                  <button onclick="window.location='/source/edit/<%= sources[i]._id %>'">Editar</button>
+                  <button onclick="deleteSource('<%= sources[i]._id %>', '<%= sources[i].src %>')">Remove</button>
+                </li>
+            <% } %>
+        </ul>
+        <i class="fa fa-refresh fa-spin spinner" id="spinner"></i>
+      </div>
+
+      <button onclick="window.location='/'">Voltar</button>
+  </div>
+    <script>
+      function deleteSource(id, src) {
+        document.getElementById('content').style.opacity = '0.3';
+        document.getElementById('spinner').style.display = 'block';
+        var xmlHttp = new XMLHttpRequest();
+        xmlHttp.onreadystatechange = function() {
+            if (xmlHttp.readyState == 4 && xmlHttp.status === 200) {
+                document.getElementById('content').innerHTML = xmlHttp.responseText;
+                document.getElementById('content').style.opacity = '1';
+                document.getElementById('spinner').style.display = 'none';
+            }
+        }
+        xmlHttp.open("DELETE", "/source/delete/"+id, true);
+        xmlHttp.send();
+      }
+    </script>
+  </body>
+</html>

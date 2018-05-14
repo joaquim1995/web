@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Edit Source</title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+  </head>
+  <body>
+    <h1>Edit  <% if(locals.src){ %><%= src %><% } %></h1>
+    <input type="hidden" id="id" name="id" value="<% if(locals.id){ %><%= id %><% } %>"/>
+      <div>Source:</div>
+      <input type="Text" name="src" id="src" value="<% if(locals.src){ %><%= src %><% } %>"/>
+    <button onclick="editSource()">Edit Me</button>
+    <button onclick="window.location='/source/list'">Voltar</button>
+
+    <script>
+      function editSource(){
+        var id=document.getElementById('id').value;
+        var src=document.getElementById('src').value;
+
+        var xmlHttp = new XMLHttpRequest();
+        xmlHttp.onreadystatechange = function() {
+            if (xmlHttp.readyState == 4 && xmlHttp.status === 200) {
+                window.location = '/source/list';
+            }
+        }
+        xmlHttp.open("PUT", "/source/edit/"+id+"/"+src, true);
+        xmlHttp.send();
+
+
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= title %></title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+  </head>
+  <body>
+    <h1><%= title %></h1>
+    <p>Welcome to <%= title %></p>
+    <h1>Adicionar Fonte</h1>
+    <form action="/source/new" method="POST">
+      <div>Source:</div>
+      <input type="Text" name="src"/>
+      <input type="Submit" value="Submit Me"/>
+    </form>
+    <button onclick="window.location='/source/list'">Ver Fontes</button>
+
+    
+    <h2>Procurar Teste</h2>
+    <label>Palavra Chave</label>
+    <input type="text" id="keyword"/>
+    <button onclick="search()">Procurar</button>
+
+    <div id="searchResult"></div>
+
+    <script>
+      function search() {
+        var xmlHttp = new XMLHttpRequest();
+        xmlHttp.onreadystatechange = function() {
+            if (xmlHttp.readyState == 4 && xmlHttp.status === 200) {
+                document.getElementById('searchResult').innerHTML = xmlHttp.responseText;
+            }
+        }
+        let keyword = document.getElementById('keyword').value;
+        xmlHttp.open("GET", "/data/get/"+keyword, true);
+        xmlHttp.send();
+      }
+    </script>
+
+  </body>
+</html>
